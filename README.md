@@ -1,6 +1,8 @@
-# 🍎 Biancaneve e i 7 Leasing — IFRS16 POC
+# 🍎 Biancaneve e i 7 Leasing — IFRS16 + IFRS18 POC
 
-Applicazione web per la gestione dei contratti di leasing secondo lo standard **IFRS16**, sviluppata con React + Vite + TypeScript + Tailwind CSS.
+Applicazione web per la gestione dei contratti di leasing secondo lo standard **IFRS16** con analisi di impatto **IFRS18**, sviluppata con React + Vite + TypeScript + Tailwind CSS.
+
+🌐 **Demo live:** [https://mesa-ht10.github.io/BiancaneveSetteLeasing-/](https://mesa-ht10.github.io/BiancaneveSetteLeasing-/)
 
 ---
 
@@ -41,10 +43,37 @@ Applicazione web per la gestione dei contratti di leasing secondo lo standard **
 - Calcolo automatico del **remeasurement** della Lease Liability
 - Preview delta pre/post modifica con IBR aggiornato
 
+### 📐 IFRS18 Impact *(nuovo)*
+Analisi dell'impatto del nuovo standard **IFRS18** (emesso IASB maggio 2024, obbligatorio dal 1° gennaio 2027) sulla riclassificazione del conto economico. Aggregata su tutti i contratti, sola lettura.
+
+- **KPI Cards** — primo anno aggregato:
+  - Canoni capitalizzati equivalenti (cash-flow proxy pre-IFRS16)
+  - Canoni esenti in OPEX (short-term / low-value)
+  - Totale lease expense equivalente
+  - Ammortamento ROU Asset (costo operativo — sopra MOL)
+  - Interessi Lease Liability (→ Financing post-IFRS18)
+
+- **Riclassificazione CE per contratto** — tabella dettagliata con cash yr1, ammortamento ROU, interessi, lease expense esenti e impatto sul MOL per ciascun contratto
+
+- **MOL Bridge** — confronto visivo pre/post IFRS18:
+  - Contributo al MOL pre-IFRS18 (ammortamento + interessi + canoni esenti)
+  - Riclassifica interessi → Financing (par. 45 IFRS18)
+  - Contributo al MOL post-IFRS18 (solo ammortamento + canoni esenti)
+  - Delta MOL (miglioramento per uscita degli interessi dal perimetro operativo)
+
+- **Scritture Simulate Reporting** — conti mock IFRS18:
+  - `REP.DA.IFRS16` — Ammortamento ROU Asset (OPERATING)
+  - `REP.OPEX.LEASE` — Canoni Esenti / Lease Expense (OPERATING)
+  - `REP.MOL.RECLASS` — Riclassifica interessi fuori MOL (OPERATING)
+  - `REP.FIN.LEASE` — Interessi su Lease Liability (FINANCING)
+
+- **Note e Assunzioni** — box con riferimenti normativi e ipotesi di calcolo
+
 ### 🤖 AI Assistant
 - Chat integrata con **Claude** (Anthropic) per guidance IFRS16
 - Import automatico dati da PDF di contratto tramite AI
 - Risposte contestualizzate al contratto selezionato
+- Richiede API key Anthropic (configurabile localmente via `.env.local`)
 
 ### 📤 Export
 - Export CSV: piano ammortamento, journal entries, riepilogo tutti i contratti
@@ -59,7 +88,18 @@ Applicazione web per la gestione dei contratti di leasing secondo lo standard **
 | Build tool | Vite 5 |
 | Styling | Tailwind CSS 3 |
 | AI | Anthropic Claude API (browser-direct) |
-| Storage | `window.storage` (persistenza locale) |
+| Storage | `localStorage` (persistenza locale per browser) |
+| CI/CD | GitHub Actions → GitHub Pages |
+
+---
+
+## Demo Live
+
+L'applicazione è pubblicata automaticamente su GitHub Pages ad ogni push su `main`:
+
+🔗 [https://mesa-ht10.github.io/BiancaneveSetteLeasing-/](https://mesa-ht10.github.io/BiancaneveSetteLeasing-/)
+
+> Le funzionalità AI non sono attive sulla demo pubblica: richiedono una API key Anthropic configurata localmente.
 
 ---
 
@@ -102,15 +142,17 @@ L'app sarà disponibile su [http://localhost:5173](http://localhost:5173).
 ```
 src/
 ├── App.tsx                        # Root: stato globale e layout
-├── constants/                     # Costanti IFRS16 (categorie, valute, ecc.)
+├── vite-env.d.ts                  # Tipi Vite (import.meta.env)
+├── constants/                     # Costanti IFRS16 (categorie, valute, tab, ecc.)
 ├── types/                         # Interfacce TypeScript
 ├── utils/
 │   ├── calculations.ts            # Engine calcolo ROU, Liability, schedule
-│   ├── journalEntries.ts          # Generazione scritture contabili
+│   ├── journalEntries.ts          # Generazione scritture contabili IFRS16
+│   ├── ifrs18.ts                  # Calcolo impatto IFRS18 (buildIFRS18Impact)
 │   ├── formatters.ts              # Formattazione numeri e date
 │   ├── validation.ts              # Validazione form contratto
 │   ├── ai.ts                      # Integrazione API Anthropic
-│   ├── storage.ts                 # Persistenza dati
+│   ├── storage.ts                 # Persistenza dati (localStorage)
 │   └── demoData.ts                # Contratti demo precaricati
 └── components/
     ├── ui/                        # Atomi (Badge, Field, Input, Toggle, ecc.)
@@ -119,13 +161,36 @@ src/
     ├── AIImportModal.tsx          # Import PDF via AI
     ├── ModificationModal.tsx      # Modifica contratto (par. 44-46)
     ├── CSVModal.tsx               # Preview export CSV
-    └── tabs/                      # Un componente per ciascuna delle 6 tab
+    └── tabs/                      # Un componente per ciascuna delle 7 tab
+        ├── ContractsTab.tsx
+        ├── AmortizationTab.tsx
+        ├── JournalEntriesTab.tsx
+        ├── FinancialStatementsTab.tsx
+        ├── ModificationsTab.tsx
+        ├── ExportTab.tsx
+        └── IFRS18Tab.tsx          # Analisi impatto IFRS18
 ```
+
+---
+
+## CI/CD
+
+Il progetto usa **GitHub Actions** per il deploy automatico su GitHub Pages:
+
+```
+.github/workflows/deploy.yml
+```
+
+Ogni push su `main` trigera:
+1. `npm ci` — installa dipendenze
+2. `npm run build` — build Vite (con TypeScript check)
+3. Deploy della cartella `dist/` su GitHub Pages
 
 ---
 
 ## Note
 
-- I dati sono persistiti localmente tramite `window.storage`. In assenza di dati salvati, vengono caricati 3 contratti demo (immobile, veicoli, IT equipment).
-- Le funzionalità AI richiedono una API key Anthropic valida e una connessione internet.
-- Il progetto è un **POC** (Proof of Concept) a scopo dimostrativo.
+- I dati sono persistiti localmente tramite `localStorage`. In assenza di dati salvati, vengono caricati 3 contratti demo (immobile, veicoli, IT equipment).
+- Le funzionalità AI richiedono una API key Anthropic valida e una connessione internet. Non sono attive nella demo pubblica su GitHub Pages.
+- La tab **IFRS18 Impact** è di sola lettura e non richiede input aggiuntivi: elabora i dati già presenti nei contratti IFRS16 caricati.
+- Il progetto è un **POC** (Proof of Concept) a scopo dimostrativo. IFRS18 applicazione obbligatoria dal 1° gennaio 2027.
