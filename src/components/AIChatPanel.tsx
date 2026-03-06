@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Contract } from "../types";
 import { askAIAssistant } from "../utils/ai";
 
+const HAS_API_KEY = !!import.meta.env.VITE_ANTHROPIC_API_KEY;
+
 interface AIChatPanelProps {
   contract: Contract | undefined;
   onClose: () => void;
@@ -33,8 +35,9 @@ export function AIChatPanel({ contract, onClose }: AIChatPanelProps) {
       const apiMsgs = newMsgs.map(m => ({ role: m.role, content: m.content }));
       const reply = await askAIAssistant(apiMsgs, contract as any);
       setMessages(p => [...p, { role: "assistant", content: reply }]);
-    } catch {
-      setMessages(p => [...p, { role: "assistant", content: "Errore di comunicazione con l'AI." }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Errore di comunicazione con l'AI.";
+      setMessages(p => [...p, { role: "assistant", content: `⚠️ ${msg}` }]);
     }
     setLoading(false);
   };
@@ -51,6 +54,14 @@ export function AIChatPanel({ contract, onClose }: AIChatPanelProps) {
         </div>
         <button onClick={onClose} className="text-white/70 hover:text-white text-xl">×</button>
       </div>
+      {!HAS_API_KEY && (
+        <div className="mx-3 mt-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-[10px] text-amber-700 leading-relaxed">
+          <strong>⚠️ API key non configurata.</strong><br />
+          Crea il file <code className="bg-amber-100 px-1 rounded">.env.local</code> con:<br />
+          <code className="bg-amber-100 px-1 rounded">VITE_ANTHROPIC_API_KEY=sk-ant-...</code><br />
+          poi riavvia il server.
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
