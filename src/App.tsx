@@ -18,6 +18,7 @@ import { JournalEntriesTab } from "./components/tabs/JournalEntriesTab";
 import { FinancialStatementsTab } from "./components/tabs/FinancialStatementsTab";
 import { ModificationsTab } from "./components/tabs/ModificationsTab";
 import { ExportTab } from "./components/tabs/ExportTab";
+import { IFRS18Tab } from "./components/tabs/IFRS18Tab";
 
 export default function App() {
   const [contracts, setContracts] = useState<Contract[]>([]);
@@ -253,6 +254,9 @@ export default function App() {
             handleExportAll={handleExportAll}
             selectedContractExists={!!selectedContract}
           />
+        )}
+        {activeTab === 6 && (
+          <IFRS18Tab contracts={contracts} allSchedules={allSchedules} />
         )}
       </div>
 

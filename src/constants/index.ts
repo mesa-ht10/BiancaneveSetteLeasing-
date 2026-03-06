@@ -30,5 +30,5 @@ export const CAT_ICONS: Record<string, string> = {
   FURNITURE: "🪑",
   OTHER: "📦",
 };
-export const NAV_TABS = ["Contratti", "Piano Ammortamento", "Journal Entries", "Financial Statements", "Modifiche", "Export"];
+export const NAV_TABS = ["Contratti", "Piano Ammortamento", "Journal Entries", "Financial Statements", "Modifiche", "Export", "IFRS18 Impact"];
 export const STORAGE_KEY = "mesa_ifrs16_v4";
