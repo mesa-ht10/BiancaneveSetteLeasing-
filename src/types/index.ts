@@ -118,6 +118,7 @@ export interface Schedule {
   liability0?: number;
   rou0?: number;
   rouAmortPerPeriod?: number;
+  amortTermMonths?: number;
   numPeriods?: number;
   isFX?: boolean;
   annualRate?: number;
