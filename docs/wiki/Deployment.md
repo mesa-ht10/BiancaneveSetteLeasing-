@@ -24,7 +24,7 @@ L'app è disponibile su http://localhost:5173
 
 | Variabile | Obbligatoria | Descrizione |
 |-----------|-------------|-------------|
-| `VITE_ANTHROPIC_API_KEY` | No (solo per AI) | API key Anthropic (`sk-ant-...`) |
+| `VITE_ANTHROPIC_API_KEY` | No (solo per AI) | API key Anthropic — usata solo in sviluppo locale, chiamata diretta dal browser |
 
 Crea `.env.local` nella root (mai committare su git):
 ```env
@@ -112,6 +112,41 @@ Senza questo `base`, i file JS/CSS non verrebbero trovati dal browser.
 
 ---
 
+## Vercel
+
+Il branch `vercel-deploy` è configurato per il deployment su Vercel con proxy AI sicuro.
+
+### Setup iniziale
+
+1. Su [vercel.com](https://vercel.com) → **Add New Project** → importa il repo
+2. Seleziona il branch **`vercel-deploy`** come production branch
+3. Framework preset: **Vite** (rilevato automaticamente)
+4. Build command: `npm run build` — Output dir: `dist`
+
+### Variabili d'ambiente Vercel
+
+Configurare in **Project Settings → Environment Variables**:
+
+| Variabile | Descrizione |
+|-----------|-------------|
+| `ANTHROPIC_API_KEY` | API key Anthropic (server-side, mai esposta al browser) |
+| `ALLOWED_ORIGIN` | URL del deployment, es. `https://tua-app.vercel.app` |
+
+> Vedi [[Sicurezza]] per i dettagli sulle protezioni implementate.
+
+### Differenze rispetto a GitHub Pages
+
+| Aspetto | GitHub Pages (`main`) | Vercel (`vercel-deploy`) |
+|---------|----------------------|--------------------------|
+| Hosting | Statico | Statico + Edge Functions |
+| AI Chat | Chiave nel browser | Chiave solo server-side |
+| Security headers | Nessuno | Configurati in `vercel.json` |
+| `vite.config.ts` base | `/BiancaneveSetteLeasing-/` | `/` (root) |
+
+---
+
 ## Aggiornare il Deployment
 
-Ogni `git push origin main` rideploya automaticamente il sito in circa 2 minuti. Lo stato del deployment è visibile nel tab **Actions** del repository GitHub.
+Ogni `git push origin main` rideploya automaticamente GitHub Pages in circa 2 minuti. Lo stato è visibile nel tab **Actions** del repository GitHub.
+
+Per Vercel, ogni push su `vercel-deploy` attiva un nuovo deployment automatico.

@@ -20,7 +20,8 @@ Benvenuto nella documentazione dell'applicazione **MESA Biancaneve e i 7 Leasing
 | [[IFRS18-Impact]] | Riclassificazione CE, MOL Bridge, scritture simulate |
 | [[AI-Assistant]] | Chat IFRS16, import PDF, configurazione API key |
 | [[Export]] | Export CSV piano, JE, riepilogo contratti |
-| [[Deployment]] | Avvio locale, GitHub Actions, GitHub Pages |
+| [[Deployment]] | Avvio locale, GitHub Actions, GitHub Pages, Vercel |
+| [[Sicurezza]] | Proxy API, security headers, variabili d'ambiente Vercel |
 
 ---
 
